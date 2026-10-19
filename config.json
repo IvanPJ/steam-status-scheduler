@@ -1,0 +1,14 @@
+{
+  "pollSeconds": 30,
+  "steamStartupGraceSeconds": 45,
+  "defaultStatus": "online",
+  "windows": [
+    {
+      "name": "fim-de-semana-manha",
+      "days": ["Saturday", "Sunday"],
+      "start": "06:00",
+      "end": "12:00",
+      "status": "invisible"
+    }
+  ]
+}
