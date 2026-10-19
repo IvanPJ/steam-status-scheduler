@@ -24,59 +24,72 @@ Abra o PowerShell (tecla Windows, digite `powershell`, Enter) e cole:
 irm https://raw.githubusercontent.com/IvanPJ/steam-status-scheduler/main/install.ps1 | iex
 ```
 
-Nos dois casos ele instala em `%LOCALAPPDATA%\SteamStatusScheduler` (algo como `C:\Users\SEU_NOME\AppData\Local\SteamStatusScheduler`) e cria uma tarefa agendada que inicia junto com o Windows, sem janela nenhuma.
+Nos dois casos ele instala em `%LOCALAPPDATA%\SteamStatusScheduler`, cria uma tarefa agendada que inicia junto com o Windows (sem janela nenhuma), cria o atalho **Steam Status Scheduler** no Menu Iniciar e já abre a tela de configuração.
 
-## Mudar os horários
+## Configurar
 
-Na pasta de instalação, dê duplo clique em **`Editar-horarios.bat`** (abre o `config.json` no Bloco de Notas):
+Tecla Windows, digite **Steam Status Scheduler**, Enter (ou `Configurar.bat` na pasta de instalação). Abre isso:
 
-```json
-{
-  "pollSeconds": 30,
-  "steamStartupGraceSeconds": 45,
-  "defaultStatus": "online",
-  "windows": [
-    {
-      "name": "fim-de-semana-manha",
-      "days": ["Saturday", "Sunday"],
-      "start": "06:00",
-      "end": "12:00",
-      "status": "invisible"
-    }
-  ]
-}
+```
+   ___ _____ ___   _   __  __    ___ _____ _ _____ _   _ ___
+  / __|_   _| __| /_\ |  \/  |  / __|_   _/_\_   _| | | / __|
+  \__ \ | | | _| / _ \| |\/| |  \__ \ | |/ _ \| | | |_| \__ \
+  |___/ |_| |___/_/ \_\_|  |_|  |___/ |_/_/ \_\_|  \___/|___/
+                          S C H E D U L E R
+
++----------------------------------------------------------------------------+
+|  Servico: ATIVO                                                            |
++----------------------------------------------------------------------------+
+|  JANELAS DE HORARIO                                                        |
+|    #  Nome                 Dias                   Horario      Status      |
+|    1  fim-de-semana-manha  Sab e Dom              06:00-12:00  invisible   |
+|                                                                            |
+|  Fora das janelas: online                                                  |
++----------------------------------------------------------------------------+
+|  SEMANA  (cada bloco = 30 min)                                             |
+|         0     3     6     9     12    15    18    21    24                 |
+|   Seg   ................................................                   |
+|   Ter   ................................................                   |
+|   Qua   ................................................                   |
+|   Qui   ................................................                   |
+|   Sex   ................................................                   |
+|   Sab   ............############........................                   |
+|   Dom   ............############........................                   |
+|         # invisible  X offline  ~ away  ! busy  = online                   |
++----------------------------------------------------------------------------+
+|  [A] Adicionar  [E] Editar  [R] Remover  [P] Status fora das janelas       |
+|  [T] Testar agora  [L] Ver log  [S] Salvar  [Q] Sair                       |
++----------------------------------------------------------------------------+
 ```
 
-- `days`: dias em inglês: `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`, `Sunday` (ou `Mon`, `Tue`...).
-- `start` / `end`: horário no formato `HH:mm`, dentro do mesmo dia (`start` menor que `end`).
-- `status`: o que aplicar na janela:
-  - `invisible`: aparece offline pros amigos, mas você ainda vê a lista e recebe mensagens. **É o recomendado.**
-  - `offline`: modo "Ficar offline" da Steam, desconecta do chat de amigos.
-  - `away`, `busy`, `online` também valem.
-- `defaultStatus`: pra onde voltar quando a janela termina (normalmente `online`).
-- Pode ter várias janelas na lista `windows`, é só copiar o bloco entre chaves e separar por vírgula.
+- **[A] Adicionar / [E] Editar**: pergunta nome, dias (marca com 1-7, ou `U` = seg a sex, `F` = sab e dom, `T` = todos), horário de início e fim, e o status.
+- **[P]**: pra onde voltar quando a janela termina (normalmente `online`).
+- **[T] Testar agora**: deixa você invisível por 45 segundos e volta pra online, pra ver que funciona.
+- **[L] Ver log**: cada troca de status vira uma linha com data e hora.
+- **[S] Salvar**: o serviço lê o novo horário em até 30 segundos, não precisa reiniciar nada.
+- O cabeçalho mostra se o serviço está **ATIVO**. Se aparecer PARADO, aperta **[I]** pra iniciar.
 
-Salvou o arquivo, pronto. Não precisa reiniciar nada, ele relê o config sozinho.
+Status disponíveis:
 
-## Saber se está funcionando
+- `invisible`: aparece offline pros amigos, mas você ainda vê a lista e recebe mensagens. **É o recomendado.**
+- `offline`: modo "Ficar offline" da Steam, desconecta do chat de amigos.
+- `away`, `busy`, `online` também valem.
 
-Duplo clique em **`Ver-status.bat`** na pasta de instalação. Mostra se a tarefa está `Running` e as últimas linhas do log (cada troca de status vira uma linha com data e hora).
-
-Também dá pra ver no **Agendador de Tarefas** do Windows: a tarefa se chama `SteamStatusScheduler`.
+Detalhes: cada janela começa e termina no mesmo dia (de 00:00 até 23:59). Se você trocar o status na mão no meio de uma janela, ele respeita e não força de volta.
 
 ## Desinstalar
 
-Duplo clique em **`Desinstalar.bat`** na pasta de instalação. Remove a tarefa e apaga a pasta. Se você estava invisível por causa dele, volta pra online antes de sair.
+`Desinstalar.bat` na pasta de instalação (`%LOCALAPPDATA%\SteamStatusScheduler`). Remove a tarefa, o atalho do Menu Iniciar e a pasta. Se você estava invisível por causa dele, volta pra online antes de sair.
 
 ## Como funciona
 
-- Um script PowerShell fica rodando escondido e, a cada 30 segundos (`pollSeconds`), confere o dia e a hora.
-- Quando entra numa janela do `config.json` e a Steam está aberta, manda o comando `steam://friends/status/invisible` pra própria Steam. Só uma vez por janela: se você trocar o status na mão no meio, ele respeita.
-- Quando a janela termina, manda `steam://friends/status/online` (ou o `defaultStatus`).
+- Um script PowerShell fica rodando escondido e, a cada 30 segundos, confere o dia e a hora.
+- Quando entra numa janela e a Steam está aberta, manda o comando `steam://friends/status/invisible` pra própria Steam. Só uma vez por janela.
+- Quando a janela termina, manda `steam://friends/status/online` (ou o status que você escolheu em [P]).
 - Se a Steam estiver fechada no começo da janela, aplica assim que ela abrir (espera 45 segundos pra ela terminar de logar).
-- Estado e log ficam na pasta de instalação: `state.json` e `scheduler.log`.
+- Tudo fica na pasta de instalação: `config.json` (horários), `state.json`, `scheduler.log`. Quem preferir pode editar o `config.json` direto no Bloco de Notas.
 
-Limitações: a janela precisa começar e terminar no mesmo dia (sem virar a madrugada, por enquanto). O script só mexe no status de amigos, não interfere nos jogos.
+O script só mexe no status de amigos, não interfere nos jogos.
 
 ## Licença
 

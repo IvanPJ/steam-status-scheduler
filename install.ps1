@@ -12,7 +12,9 @@
 $RepoRaw    = 'https://raw.githubusercontent.com/IvanPJ/steam-status-scheduler/main'
 $TaskName   = 'SteamStatusScheduler'
 $InstallDir = Join-Path $env:LOCALAPPDATA 'SteamStatusScheduler'
-$Files      = @('SteamStatusScheduler.ps1', 'install.ps1', 'uninstall.ps1', 'Instalar.bat', 'Desinstalar.bat', 'Editar-horarios.bat', 'Ver-status.bat', 'README.md')
+$Files      = @('SteamStatusScheduler.ps1', 'Configurar.ps1', 'install.ps1', 'uninstall.ps1', 'Instalar.bat', 'Configurar.bat', 'Desinstalar.bat', 'README.md')
+$Obsolete   = @('Editar-horarios.bat', 'Ver-status.bat')
+$ShortcutPath = Join-Path ([Environment]::GetFolderPath('Programs')) 'Steam Status Scheduler.lnk'
 $ConfigFile = 'config.json'
 
 function Stop-SchedulerInstances {
@@ -22,6 +24,20 @@ function Stop-SchedulerInstances {
     Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe'" |
         Where-Object { $_.CommandLine -like '*SteamStatusScheduler.ps1*' } |
         ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+}
+
+function New-StartMenuShortcut {
+    # "Steam Status Scheduler" in the Start Menu opens the configuration screen
+    $steamExe = $null
+    try { $steamExe = (Get-ItemProperty 'HKCU:\Software\Valve\Steam' -ErrorAction Stop).SteamExe -replace '/', '\' } catch { }
+    $shell = New-Object -ComObject WScript.Shell
+    $lnk = $shell.CreateShortcut($ShortcutPath)
+    $lnk.TargetPath = 'powershell.exe'
+    $lnk.Arguments = '-NoProfile -ExecutionPolicy Bypass -File "' + (Join-Path $InstallDir 'Configurar.ps1') + '"'
+    $lnk.WorkingDirectory = $InstallDir
+    $lnk.Description = 'Configurar o Steam Status Scheduler'
+    if ($steamExe -and (Test-Path $steamExe)) { $lnk.IconLocation = $steamExe + ',0' }
+    $lnk.Save()
 }
 
 function Install-SteamStatusScheduler {
@@ -65,6 +81,8 @@ function Install-SteamStatusScheduler {
             }
         }
 
+        foreach ($name in $Obsolete) { Remove-Item -Path (Join-Path $InstallDir $name) -Force -ErrorAction SilentlyContinue }
+
         $scriptPath = Join-Path $InstallDir 'SteamStatusScheduler.ps1'
         $action   = New-ScheduledTaskAction -Execute 'conhost.exe' `
             -Argument "--headless powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$scriptPath`""
@@ -81,12 +99,26 @@ function Install-SteamStatusScheduler {
         Start-Sleep -Seconds 2
         $state = (Get-ScheduledTask -TaskName $TaskName).State
 
+        New-StartMenuShortcut
+
         Write-Host ''
         Write-Host "Instalado! Tarefa '$TaskName': $state"
         Write-Host "Pasta: $InstallDir"
-        Write-Host '  - Editar-horarios.bat  -> muda os dias/horarios (config.json)'
-        Write-Host '  - Ver-status.bat       -> mostra se esta rodando e o log'
-        Write-Host '  - Desinstalar.bat      -> remove tudo'
+        Write-Host ''
+
+        $interactive = [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and -not $env:SSS_NO_UI
+        if ($interactive) {
+            Write-Host 'Abrindo a tela de configuracao...'
+            Start-Sleep -Seconds 1
+            & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $InstallDir 'Configurar.ps1')
+        }
+
+        Write-Host ''
+        Write-Host '=== Steam Status Scheduler instalado ==='
+        Write-Host "Pasta: $InstallDir"
+        Write-Host '  - Menu Iniciar > "Steam Status Scheduler"  -> tela de configuracao (horarios, status, log, teste)'
+        Write-Host '  - Configurar.bat                           -> a mesma tela'
+        Write-Host '  - Desinstalar.bat                          -> remove tudo'
         Write-Host ''
     } finally {
         $ErrorActionPreference = $previousEap

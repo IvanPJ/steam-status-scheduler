@@ -2,6 +2,7 @@
 
 $TaskName   = 'SteamStatusScheduler'
 $InstallDir = Join-Path $env:LOCALAPPDATA 'SteamStatusScheduler'
+$ShortcutPath = Join-Path ([Environment]::GetFolderPath('Programs')) 'Steam Status Scheduler.lnk'
 $ErrorActionPreference = 'SilentlyContinue'
 
 # if the scheduler had set a status, put the user back online before leaving
@@ -16,7 +17,8 @@ Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe'" |
     Where-Object { $_.CommandLine -like '*SteamStatusScheduler.ps1*' } |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
-Write-Host "Tarefa '$TaskName' removida."
+Remove-Item -Path $ShortcutPath -Force
+Write-Host "Tarefa '$TaskName' e atalho do Menu Iniciar removidos."
 
 if (Test-Path $InstallDir) {
     # this script may live inside the folder, so the folder is deleted a few seconds after we exit
