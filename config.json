@@ -1,6 +1,4 @@
 {
-  "pollSeconds": 30,
-  "steamStartupGraceSeconds": 45,
   "defaultStatus": "online",
   "windows": [
     {

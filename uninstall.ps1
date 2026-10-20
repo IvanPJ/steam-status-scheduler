@@ -1,21 +1,18 @@
-# uninstall.ps1 - remove a tarefa agendada, o atalho e a pasta %LOCALAPPDATA%\SteamStatusScheduler
+# uninstall.ps1 - remove as tarefas agendadas, o atalho e a pasta %LOCALAPPDATA%\SteamStatusScheduler
 
-$TaskName     = 'SteamStatusScheduler'
 $InstallDir   = Join-Path $env:LOCALAPPDATA 'SteamStatusScheduler'
 $ShortcutPath = Join-Path ([Environment]::GetFolderPath('Programs')) 'Steam Status Scheduler.lnk'
 $ErrorActionPreference = 'SilentlyContinue'
 
-# se o agendador tinha deixado voce invisivel, volta pra online antes de sair
-$statePath = Join-Path $InstallDir 'state.json'
-if (Test-Path $statePath) {
-    $state = Get-Content -Raw $statePath | ConvertFrom-Json
-    if ($state.appliedWindow) { Start-Process 'steam://friends/status/online' }
-}
-
-Stop-ScheduledTask -TaskName $TaskName
-Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+. (Join-Path $PSScriptRoot 'Tarefas.ps1')
+Remove-SssTasks
+[void](Remove-SssLegacy)
 Remove-Item -Path $ShortcutPath -Force
-Write-Host "Tarefa '$TaskName' e atalho do Menu Iniciar removidos."
+Write-Host 'Tarefas agendadas e atalho do Menu Iniciar removidos.'
+
+# volta pra online, caso uma janela estivesse ativa
+$steam = Get-SssSteamExe
+if ($steam -and (Get-Process steam -ErrorAction SilentlyContinue)) { Start-Process -FilePath $steam -ArgumentList '-silent steam://friends/status/online' }
 
 if (Test-Path $InstallDir) {
     # este script pode estar dentro da pasta, entao ela e apagada alguns segundos depois de sair
