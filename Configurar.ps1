@@ -479,7 +479,7 @@ $Xaml = @'
                       </TextBlock>
                     </Grid>
                     <TextBlock x:Name="ModeSub" Text="" Foreground="#C9B8F0" FontSize="13" Margin="2,0,0,0"/>
-                    <TextBlock Text="se o seu status na steam estiver diferente, clique em APLICAR AGORA" Foreground="#6B5A8A" FontSize="10" Margin="2,3,0,0"/>
+                    <TextBlock Text="durante a janela, o status é reenviado pra steam a cada 1 minuto" Foreground="#6B5A8A" FontSize="10" Margin="2,3,0,0"/>
                   </StackPanel>
                   <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                     <TextBlock x:Name="NextLabel" Text="PRÓXIMA JANELA" Foreground="#8A78B0" FontSize="11" HorizontalAlignment="Right"/>

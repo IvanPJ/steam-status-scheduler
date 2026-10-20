@@ -43,14 +43,16 @@ Status disponíveis:
 
 Não fica nenhum programa rodando em segundo plano. Cada janela vira duas tarefas na pasta `SteamStatusScheduler` do Agendador de Tarefas do Windows:
 
-- no início, a tarefa roda `steam.exe -silent steam://friends/status/invisible` (ou o status escolhido);
+- no início, a tarefa roda `steam.exe -silent steam://friends/status/invisible` (ou o status escolhido) e repete a cada 1 minuto até o fim da janela;
 - no fim, roda o mesmo comando com o status de "fora das janelas".
 
 Quem executa é o próprio Windows, e quem troca o status é a própria Steam. Detalhes:
 
 - Se o PC estava desligado no horário, a tarefa roda assim que ele ligar.
-- Se a Steam estiver fechada no horário, ela abre minimizada na bandeja já com o status certo.
-- Entre o início e o fim nada é forçado: se você trocar o status na mão, ele fica até o próximo horário.
+- Se a Steam estiver fechada durante uma janela, ela é aberta minimizada na bandeja já com o status certo.
+- Durante a janela o status é reenviado a cada minuto. Se você ficar online na mão, ou a Steam reiniciar, em até 1 minuto volta pro status da janela. Fora das janelas nada é forçado.
+- 1 minuto é o menor intervalo do Agendador do Windows. Um intervalo menor exigiria um programa rodando em segundo plano, que é justamente o que antivírus barram.
+- Se você salvar uma janela que já começou, o status dela é aplicado na hora. O botão **APLICAR AGORA** faz o mesmo quando quiser.
 - Cada janela começa e termina no mesmo dia, de 00:00 até 23:59.
 
 **Antivírus:** não tem script escondido nem processo em segundo plano, só tarefas do Windows chamando a Steam. O PowerShell só roda quando você abre a janela de configuração ou o instalador. Tudo é script aberto, dá pra ler cada arquivo.

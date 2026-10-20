@@ -1,7 +1,8 @@
 ﻿# Tarefas.ps1 - turns config.json into Windows scheduled tasks that call Steam directly.
 #
 # Each time window becomes two tasks in the Task Scheduler folder \SteamStatusScheduler\:
-#   "NN <name> - inicio"  weekly on the window's days at start -> steam.exe -silent steam://friends/status/<status>
+#   "NN <name> - inicio"  weekly on the window's days at start, repeating every minute until the end
+#                         -> steam.exe -silent steam://friends/status/<status>
 #   "NN <name> - fim"     weekly on the window's days at end   -> steam.exe -silent steam://friends/status/<defaultStatus>
 # No background process, no hidden PowerShell: Windows runs steam.exe itself at those times.
 # "Start when available" makes a time missed while the PC was off run as soon as it is on again.
@@ -53,6 +54,15 @@ function Sync-SssTasks {
         )
         foreach ($p in $pairs) {
             $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek $days -At ([datetime]::Today + [TimeSpan]$p.at)
+            if ($p.suffix -eq 'inicio') {
+                # re-send the window's status every minute until it ends (Task Scheduler's smallest interval),
+                # so a manual change, a Steam restart or a window edited mid-way is corrected within a minute
+                $span = ([TimeSpan]$w.end - [TimeSpan]$w.start) - (New-TimeSpan -Minutes 1)
+                if ($span -ge (New-TimeSpan -Minutes 1)) {
+                    $rep = New-ScheduledTaskTrigger -Once -At ([datetime]::Today) -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration $span
+                    $trigger.Repetition = $rep.Repetition
+                }
+            }
             $action  = New-ScheduledTaskAction -Execute $steam -Argument ('-silent steam://friends/status/' + $p.status)
             Register-ScheduledTask -TaskPath $SssTaskPath -TaskName ($label + ' - ' + $p.suffix) -Action $action -Trigger $trigger `
                 -Settings $settings -Description ('Steam Status Scheduler: ' + $p.status + ' as ' + $p.at) | Out-Null
