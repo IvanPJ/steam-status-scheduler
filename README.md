@@ -25,7 +25,7 @@ Pronto. A janela de configuração abre sozinha no final.
 
 Funciona no Windows 10 e 11. Não precisa de administrador nem de nenhum outro programa além da Steam.
 
-![Steam Status Scheduler](docs/screenshot.png)
+![Steam Status Scheduler](docs/screenshot-v2.png)
 
 ## Usar
 
