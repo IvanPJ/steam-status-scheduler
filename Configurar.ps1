@@ -479,6 +479,7 @@ $Xaml = @'
                       </TextBlock>
                     </Grid>
                     <TextBlock x:Name="ModeSub" Text="" Foreground="#C9B8F0" FontSize="13" Margin="2,0,0,0"/>
+                    <TextBlock Text="se o seu status na steam estiver diferente, clique em APLICAR AGORA" Foreground="#6B5A8A" FontSize="10" Margin="2,3,0,0"/>
                   </StackPanel>
                   <StackPanel Grid.Column="1" HorizontalAlignment="Right">
                     <TextBlock x:Name="NextLabel" Text="PRÓXIMA JANELA" Foreground="#8A78B0" FontSize="11" HorizontalAlignment="Right"/>
@@ -486,6 +487,8 @@ $Xaml = @'
                     <TextBlock x:Name="CountText" Text="" FontFamily="Cascadia Mono, Consolas" FontSize="30" FontWeight="Bold" Foreground="#00F0FF" HorizontalAlignment="Right" Margin="0,2,0,0">
                       <TextBlock.Effect><DropShadowEffect Color="#00F0FF" BlurRadius="16" ShadowDepth="0" Opacity="0.8"/></TextBlock.Effect>
                     </TextBlock>
+                    <Button x:Name="BtnApply" Content="APLICAR AGORA" Style="{StaticResource Btn}" HorizontalAlignment="Right" Margin="0,6,4,0" Padding="12,4" FontSize="12"
+                            ToolTip="Manda pra Steam o status que a programação pede neste momento"/>
                   </StackPanel>
                 </Grid>
 
@@ -603,7 +606,7 @@ $reader = New-Object System.Xml.XmlNodeReader ([xml]$Xaml)
 $Window = [Windows.Markup.XamlReader]::Load($reader)
 foreach ($n in @('Root','TitleBar','TitleRun','VersionText','Clock','BtnMin','BtnClose','SvcDot','SvcGlow','SvcText','SteamText','BtnStart','BtnLog',
                  'WindowList','EmptyHint','BtnNew','BtnDup','BtnDel','EditorSection','TbName','DaysPanel','BtnWeekdays','BtnWeekend','BtnAllDays',
-                 'TbStart','TbEnd','StatusPanel','DefaultPanel','MsgText','BtnSave','BtnTest','Game','InfoPersona','InfoRunning','InfoLast','InfoLibrary','StatusPink','StatusCyan','StatusMain',
+                 'TbStart','TbEnd','StatusPanel','DefaultPanel','MsgText','BtnSave','BtnTest','Game','BtnApply','InfoPersona','InfoRunning','InfoLast','InfoLibrary','StatusPink','StatusCyan','StatusMain',
                  'ModeGlow','ModeSub','NextLabel','NextText','CountText','TestPanel','TestText','TestBar','HourLabels','DayLabels','WeekCanvas',
                  'Toast','ToastGlow','ToastText','LogOverlay','LogText','BtnLogClose','Boot','BootText')) {
     $Ctl[$n] = $Window.FindName($n)
@@ -1271,9 +1274,16 @@ $Ctl.BtnSave.Add_Click({
     }
     $Window.Cursor = $null
     $App.TaskCheckedAt = $null
+    $applied = Invoke-SssApplyNow -Windows $App.Cfg.windows -DefaultStatus $App.Cfg.defaultStatus
     Set-Dirty $false; Set-Msg ('salvo às ' + (Get-Date).ToString('HH:mm:ss') + '. ' + $n + ' tarefas no agendador do windows')
     Update-Readout
     Show-Toast 'SALVO  //  agenda atualizada no Windows' '#00F0FF'
+})
+
+$Ctl.BtnApply.Add_Click({
+    if (-not (Test-SteamRunning)) { Show-Toast 'a Steam não está aberta' '#FF3B5C'; return }
+    $st = Invoke-SssApplyNow -Windows $App.Cfg.windows -DefaultStatus $App.Cfg.defaultStatus -IncludeDefault
+    if ($st) { Show-Toast ('status aplicado: ' + $StatusPt[$st]) $StatusHex[$st] }
 })
 
 $Ctl.BtnTest.Add_Click({

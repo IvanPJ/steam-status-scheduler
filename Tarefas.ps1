@@ -78,3 +78,29 @@ function Remove-SssLegacy {
     }
     return $false
 }
+
+function Get-SssCurrentStatus {
+    # status the schedule wants right now: the active window's status, or $null when outside every window
+    param($Windows)
+    $now = Get-Date
+    $today = $SssDayNames[([int]$now.DayOfWeek + 6) % 7]
+    foreach ($w in @($Windows)) {
+        $days = @($w.days | ForEach-Object { Get-SssDayName $_ })
+        if ($days -notcontains $today) { continue }
+        if ($now.TimeOfDay -ge [TimeSpan]$w.start -and $now.TimeOfDay -lt [TimeSpan]$w.end) { return [string]$w.status }
+    }
+    return $null
+}
+
+function Invoke-SssApplyNow {
+    # weekly triggers only fire at the start time; a window created or edited after it started
+    # would only kick in next week, so apply the current window's status immediately
+    param($Windows, [string]$DefaultStatus, [switch]$IncludeDefault)
+    $status = Get-SssCurrentStatus -Windows $Windows
+    if (-not $status -and $IncludeDefault) { $status = $DefaultStatus }
+    if (-not $status) { return $null }
+    $steam = Get-SssSteamExe
+    if (-not $steam -or -not (Get-Process steam -ErrorAction SilentlyContinue)) { return $null }
+    Start-Process -FilePath $steam -ArgumentList ('-silent steam://friends/status/' + $status)
+    return $status
+}

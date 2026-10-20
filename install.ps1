@@ -58,6 +58,8 @@ function Install-SteamStatusScheduler {
         $cfg = Get-Content -Raw -Path (Join-Path $InstallDir $ConfigFile) | ConvertFrom-Json
         $default = 'online'; if ($cfg.defaultStatus) { $default = [string]$cfg.defaultStatus }
         $count = Sync-SssTasks -Windows @($cfg.windows) -DefaultStatus $default
+        $applied = Invoke-SssApplyNow -Windows @($cfg.windows) -DefaultStatus $default
+        if ($applied) { Write-Host "Voce esta dentro de uma janela agora: status aplicado ($applied)." }
 
         $shortcutOk = $true
         try { New-StartMenuShortcut } catch { $shortcutOk = $false; Write-Host "Aviso: nao consegui criar o atalho do Menu Iniciar. Use o Configurar.bat." -ForegroundColor Yellow }
