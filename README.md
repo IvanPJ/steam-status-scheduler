@@ -8,66 +8,31 @@ Funciona no Windows 10 e 11. Não precisa instalar nada além da própria Steam.
 
 ## Instalar
 
-### Jeito 1: duplo clique
-
 1. Baixe o projeto: botão verde **Code** > **Download ZIP** (ou [clique aqui](https://github.com/IvanPJ/steam-status-scheduler/archive/refs/heads/main.zip)).
 2. Extraia o ZIP em qualquer pasta.
 3. Dê duplo clique em **`Instalar.bat`**.
 
 Se o Windows mostrar a tela azul "O Windows protegeu o computador", clique em **Mais informações** > **Executar assim mesmo**. Isso aparece porque o arquivo veio da internet, é normal.
 
-### Jeito 2: uma linha no PowerShell
+Ele instala em `%LOCALAPPDATA%\SteamStatusScheduler`, cria uma tarefa agendada que inicia junto com o Windows (com janela oculta), cria o atalho **Steam Status Scheduler** no Menu Iniciar e já abre a janela de configuração. Não baixa nada da internet e não precisa de administrador.
 
-Abra o PowerShell (tecla Windows, digite `powershell`, Enter) e cole:
-
-```powershell
-irm https://raw.githubusercontent.com/IvanPJ/steam-status-scheduler/main/install.ps1 | iex
-```
-
-Nos dois casos ele instala em `%LOCALAPPDATA%\SteamStatusScheduler`, cria uma tarefa agendada que inicia junto com o Windows (sem janela nenhuma), cria o atalho **Steam Status Scheduler** no Menu Iniciar e já abre a tela de configuração.
+**Antivírus:** é tudo script PowerShell aberto, dá pra ler cada arquivo. Alguns antivírus (Kaspersky, por exemplo) desconfiam de script que roda escondido no logon. Se o seu bloquear, adicione a pasta `%LOCALAPPDATA%\SteamStatusScheduler` nas exceções e rode o `Instalar.bat` de novo.
 
 ## Configurar
 
-Tecla Windows, digite **Steam Status Scheduler**, Enter (ou `Configurar.bat` na pasta de instalação). Abre isso:
+Tecla Windows, digite **Steam Status Scheduler**, Enter (ou `Configurar.bat` na pasta de instalação). Abre uma janela nativa, sem navegador e sem nada instalado além do Windows:
 
-```
-   ___ _____ ___   _   __  __    ___ _____ _ _____ _   _ ___
-  / __|_   _| __| /_\ |  \/  |  / __|_   _/_\_   _| | | / __|
-  \__ \ | | | _| / _ \| |\/| |  \__ \ | |/ _ \| | | |_| \__ \
-  |___/ |_| |___/_/ \_\_|  |_|  |___/ |_/_/ \_\_|  \___/|___/
-                          S C H E D U L E R
+![Steam Status Scheduler](docs/screenshot.png)
 
-+----------------------------------------------------------------------------+
-|  Servico: ATIVO                                                            |
-+----------------------------------------------------------------------------+
-|  JANELAS DE HORARIO                                                        |
-|    #  Nome                 Dias                   Horario      Status      |
-|    1  fim-de-semana-manha  Sab e Dom              06:00-12:00  invisible   |
-|                                                                            |
-|  Fora das janelas: online                                                  |
-+----------------------------------------------------------------------------+
-|  SEMANA  (cada bloco = 30 min)                                             |
-|         0     3     6     9     12    15    18    21    24                 |
-|   Seg   ................................................                   |
-|   Ter   ................................................                   |
-|   Qua   ................................................                   |
-|   Qui   ................................................                   |
-|   Sex   ................................................                   |
-|   Sab   ............############........................                   |
-|   Dom   ............############........................                   |
-|         # invisible  X offline  ~ away  ! busy  = online                   |
-+----------------------------------------------------------------------------+
-|  [A] Adicionar  [E] Editar  [R] Remover  [P] Status fora das janelas       |
-|  [T] Testar agora  [L] Ver log  [S] Salvar  [Q] Sair                       |
-+----------------------------------------------------------------------------+
-```
-
-- **[A] Adicionar / [E] Editar**: pergunta nome, dias (marca com 1-7, ou `U` = seg a sex, `F` = sab e dom, `T` = todos), horário de início e fim, e o status.
-- **[P]**: pra onde voltar quando a janela termina (normalmente `online`).
-- **[T] Testar agora**: deixa você invisível por 45 segundos e volta pra online, pra ver que funciona.
-- **[L] Ver log**: cada troca de status vira uma linha com data e hora.
-- **[S] Salvar**: o serviço lê o novo horário em até 30 segundos, não precisa reiniciar nada.
-- O cabeçalho mostra se o serviço está **ATIVO**. Se aparecer PARADO, aperta **[I]** pra iniciar.
+- **Grade semanal**: arraste numa linha pra criar uma janela naquele dia e horário. Clique numa janela pintada pra editar.
+- **Janelas**: lista à esquerda. `[ + Nova ]`, `[ Duplicar ]`, `[ Remover ]`.
+- **Editar**: nome, dias (com atalhos seg-sex / fds / todos), início e fim em `HH:mm`, status durante a janela.
+- **Fora das janelas**: pra onde voltar quando a janela termina (normalmente `online`).
+- **Modo atual** e **próxima janela** com contagem regressiva, no painel da direita. A caveira fica com os olhos vermelhos quando você está invisível.
+- **[ Testar 45s ]**: deixa você invisível por 45 segundos e volta pra online, pra ver que funciona.
+- **[ Log ]**: cada troca de status vira uma linha com data e hora.
+- **[ SALVAR ]**: o serviço lê o novo horário em até 30 segundos, não precisa reiniciar nada.
+- O cabeçalho do painel esquerdo mostra se o serviço está **ATIVO**. Se aparecer PARADO, tem um botão `[ Iniciar ]`.
 
 Status disponíveis:
 

@@ -1,11 +1,11 @@
-# uninstall.ps1 - remove a tarefa agendada e a pasta %LOCALAPPDATA%\SteamStatusScheduler
+# uninstall.ps1 - remove a tarefa agendada, o atalho e a pasta %LOCALAPPDATA%\SteamStatusScheduler
 
-$TaskName   = 'SteamStatusScheduler'
-$InstallDir = Join-Path $env:LOCALAPPDATA 'SteamStatusScheduler'
+$TaskName     = 'SteamStatusScheduler'
+$InstallDir   = Join-Path $env:LOCALAPPDATA 'SteamStatusScheduler'
 $ShortcutPath = Join-Path ([Environment]::GetFolderPath('Programs')) 'Steam Status Scheduler.lnk'
 $ErrorActionPreference = 'SilentlyContinue'
 
-# if the scheduler had set a status, put the user back online before leaving
+# se o agendador tinha deixado voce invisivel, volta pra online antes de sair
 $statePath = Join-Path $InstallDir 'state.json'
 if (Test-Path $statePath) {
     $state = Get-Content -Raw $statePath | ConvertFrom-Json
@@ -13,15 +13,12 @@ if (Test-Path $statePath) {
 }
 
 Stop-ScheduledTask -TaskName $TaskName
-Get-CimInstance Win32_Process -Filter "Name = 'powershell.exe'" |
-    Where-Object { $_.CommandLine -like '*SteamStatusScheduler.ps1*' } |
-    ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
 Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
 Remove-Item -Path $ShortcutPath -Force
 Write-Host "Tarefa '$TaskName' e atalho do Menu Iniciar removidos."
 
 if (Test-Path $InstallDir) {
-    # this script may live inside the folder, so the folder is deleted a few seconds after we exit
+    # este script pode estar dentro da pasta, entao ela e apagada alguns segundos depois de sair
     Start-Process cmd.exe -ArgumentList "/c timeout /t 3 /nobreak >nul & rmdir /s /q `"$InstallDir`"" -WindowStyle Hidden
     Write-Host "A pasta $InstallDir sera apagada em alguns segundos."
 }

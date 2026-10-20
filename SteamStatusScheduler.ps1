@@ -156,12 +156,16 @@ if ($Set) {
 
 Write-Log "scheduler started (pid $PID, config '$ConfigPath')"
 
+$BeatPath = Join-Path $StateDir 'heartbeat'
+
 while ($true) {
     try {
         Invoke-Tick
     } catch {
         Write-Log "ERROR: $($_.Exception.Message)"
     }
+    # heartbeat: the configuration UI reads this file's timestamp to know the loop is alive
+    try { [IO.File]::WriteAllText($BeatPath, (Get-Date).ToString('o')) } catch { }
     if ($Once) { break }
     $sleep = 60
     try { $sleep = [int](Read-Config).pollSeconds } catch { }
