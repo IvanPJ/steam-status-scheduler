@@ -465,16 +465,16 @@ $Xaml = @'
             <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
 
             <ContentControl Style="{StaticResource Hud}" Padding="0">
-              <Grid ClipToBounds="True">
-                <Canvas x:Name="Horizon" ClipToBounds="True"/>
-                <Grid Margin="26,22,26,0" VerticalAlignment="Top">
+              <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <Grid Margin="26,20,26,0">
                   <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                   <StackPanel>
                     <TextBlock Text="AGORA, PELA PROGRAMAÇÃO" Foreground="#8A78B0" FontSize="11"/>
                     <Grid Margin="0,2,0,0">
-                      <TextBlock x:Name="StatusPink" Text="..." FontSize="64" FontWeight="Bold" Foreground="#FF2BD6" Opacity="0.85"/>
-                      <TextBlock x:Name="StatusCyan" Text="..." FontSize="64" FontWeight="Bold" Foreground="#00F0FF" Opacity="0.85"/>
-                      <TextBlock x:Name="StatusMain" Text="..." FontSize="64" FontWeight="Bold" Foreground="#FFFFFF">
+                      <TextBlock x:Name="StatusPink" Text="..." FontSize="54" FontWeight="Bold" Foreground="#FF2BD6" Opacity="0.85"/>
+                      <TextBlock x:Name="StatusCyan" Text="..." FontSize="54" FontWeight="Bold" Foreground="#00F0FF" Opacity="0.85"/>
+                      <TextBlock x:Name="StatusMain" Text="..." FontSize="54" FontWeight="Bold" Foreground="#FFFFFF">
                         <TextBlock.Effect><DropShadowEffect x:Name="ModeGlow" Color="#FF2BD6" BlurRadius="26" ShadowDepth="0" Opacity="0.9"/></TextBlock.Effect>
                       </TextBlock>
                     </Grid>
@@ -488,12 +488,40 @@ $Xaml = @'
                     </TextBlock>
                   </StackPanel>
                 </Grid>
-                <StackPanel x:Name="TestPanel" Visibility="Collapsed" VerticalAlignment="Bottom" Margin="40,0,40,18">
-                  <TextBlock x:Name="TestText" Text="" HorizontalAlignment="Center" FontWeight="Bold" FontSize="14" Foreground="#FFFFFF"/>
-                  <Border BorderBrush="#FF2BD6" BorderThickness="1" Height="8" Margin="0,6,0,0" Background="#330A0014">
-                    <Rectangle x:Name="TestBar" Fill="#FF2BD6" HorizontalAlignment="Left" Width="0"/>
-                  </Border>
-                </StackPanel>
+
+                <Border Grid.Row="1" Margin="22,12,22,10" BorderBrush="#2A1A45" BorderThickness="0,1,0,1" Background="#66050010">
+                  <Grid>
+                    <Canvas x:Name="Game" ClipToBounds="True"/>
+                    <StackPanel x:Name="TestPanel" Visibility="Collapsed" VerticalAlignment="Center" Margin="60,0">
+                      <TextBlock x:Name="TestText" Text="" HorizontalAlignment="Center" FontWeight="Bold" FontSize="15" Foreground="#FFFFFF"/>
+                      <Border BorderBrush="#FF2BD6" BorderThickness="1" Height="8" Margin="0,6,0,0" Background="#CC0A0014">
+                        <Rectangle x:Name="TestBar" Fill="#FF2BD6" HorizontalAlignment="Left" Width="0"/>
+                      </Border>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+
+                <Grid Grid.Row="2" Margin="22,0,22,16">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.1*"/><ColumnDefinition Width="1.5*"/><ColumnDefinition Width="0.8*"/><ColumnDefinition Width="0.8*"/>
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Grid.Column="3" Margin="0,0,0,0">
+                    <TextBlock Text="ESPAÇO EM DISCO" Foreground="#8A78B0" FontSize="10"/>
+                    <TextBlock x:Name="InfoPersona" Text="..." FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                  </StackPanel>
+                  <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                    <TextBlock Text="JOGANDO AGORA" Foreground="#8A78B0" FontSize="10"/>
+                    <TextBlock x:Name="InfoRunning" Text="..." FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                    <TextBlock Text="ÚLTIMO JOGO" Foreground="#8A78B0" FontSize="10"/>
+                    <TextBlock x:Name="InfoLast" Text="..." FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                  </StackPanel>
+                  <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                    <TextBlock Text="BIBLIOTECA" Foreground="#8A78B0" FontSize="10"/>
+                    <TextBlock x:Name="InfoLibrary" Text="..." FontWeight="Bold" FontSize="14" TextTrimming="CharacterEllipsis"/>
+                  </StackPanel>
+                </Grid>
               </Grid>
             </ContentControl>
 
@@ -566,8 +594,8 @@ $App = @{
     Testing = $false; TestLeft = 0; Tick = 0; ClockTick = 0
     BootText = ''; BootPos = 0; BootDone = $false; BootStart = $null
     Rnd = New-Object Random; SteamRunning = $false; Closing = $false; ToastUntil = $null
-    SunTop = $null; Mode = ''; HzPhase = 0.0; FloorH = $null; Stars = $null; HzY = 0; HzH = 0
-    Accent = [Windows.Media.SolidColorBrush]::new((Color '#FF2BD6')); SunStop = $null; Glitch = 0
+    Mode = ''; Pong = $null; Steam = $null
+    Accent = [Windows.Media.SolidColorBrush]::new((Color '#FF2BD6')); Accent2 = [Windows.Media.SolidColorBrush]::new((Color '#00F0FF')); Glitch = 0
 }
 $Ctl = @{}
 
@@ -575,7 +603,7 @@ $reader = New-Object System.Xml.XmlNodeReader ([xml]$Xaml)
 $Window = [Windows.Markup.XamlReader]::Load($reader)
 foreach ($n in @('Root','TitleBar','TitleRun','VersionText','Clock','BtnMin','BtnClose','SvcDot','SvcGlow','SvcText','SteamText','BtnStart','BtnLog',
                  'WindowList','EmptyHint','BtnNew','BtnDup','BtnDel','EditorSection','TbName','DaysPanel','BtnWeekdays','BtnWeekend','BtnAllDays',
-                 'TbStart','TbEnd','StatusPanel','DefaultPanel','MsgText','BtnSave','BtnTest','Horizon','StatusPink','StatusCyan','StatusMain',
+                 'TbStart','TbEnd','StatusPanel','DefaultPanel','MsgText','BtnSave','BtnTest','Game','InfoPersona','InfoRunning','InfoLast','InfoLibrary','StatusPink','StatusCyan','StatusMain',
                  'ModeGlow','ModeSub','NextLabel','NextText','CountText','TestPanel','TestText','TestBar','HourLabels','DayLabels','WeekCanvas',
                  'Toast','ToastGlow','ToastText','LogOverlay','LogText','BtnLogClose','Boot','BootText')) {
     $Ctl[$n] = $Window.FindName($n)
@@ -802,90 +830,235 @@ function Update-NowLine {
     for ($d = 0; $d -lt 7; $d++) { $App.DayLbl[$d].Foreground = @($Br.Dim, $Br.Cyan)[[int]($d -eq $today)] }
 }
 
-# ---------------------------------------------------------------- synthwave horizon
+# ---------------------------------------------------------------- steam info (game library manifests only)
+# Deliberately reads ONLY steamapps\*.acf / libraryfolders.vdf and the RunningAppID registry value.
+# Never read Steam account/login/user config files: that is what Steam account stealers do,
+# and antivirus heuristics (Kaspersky) flag and delete the script for it.
 
-function Build-Horizon {
-    $cv = $Ctl.Horizon; $cv.Children.Clear()
-    $w = $cv.ActualWidth; $h = $cv.ActualHeight
-    if ($w -lt 50 -or $h -lt 50) { return }
-    $App.HzH = $h; $hy = [Math]::Round($h * 0.60); $App.HzY = $hy
-    $cx = $w * 0.62
-
-    $sky = New-Object Windows.Shapes.Rectangle
-    $sky.Width = $w; $sky.Height = $hy; $sky.Fill = $App.Accent
-    $m = [Windows.Media.LinearGradientBrush]::new((Color '#00000000'), (Color '#55000000'), 90)
-    $sky.OpacityMask = $m
-    $cv.Children.Add($sky) | Out-Null
-
-    $App.Stars = New-Object System.Collections.ArrayList
-    for ($k = 0; $k -lt 46; $k++) {
-        $el = New-Object Windows.Shapes.Ellipse
-        $sz = 1 + $App.Rnd.NextDouble() * 1.8
-        $el.Width = $sz; $el.Height = $sz; $el.Fill = $Br.Star; $el.Opacity = 0.2 + $App.Rnd.NextDouble() * 0.8
-        [Windows.Controls.Canvas]::SetLeft($el, $App.Rnd.NextDouble() * $w); [Windows.Controls.Canvas]::SetTop($el, $App.Rnd.NextDouble() * ($hy - 20))
-        $cv.Children.Add($el) | Out-Null; [void]$App.Stars.Add($el)
+function Read-SteamInfo {
+    $info = @{ Games = @{}; Recent = @(); Installed = 0; Bytes = [int64]0 }
+    try { $root = (Get-ItemProperty 'HKCU:\Software\Valve\Steam' -ErrorAction Stop).SteamPath -replace '/', '\' } catch { return $info }
+    $libs = @($root)
+    $lf = Join-Path $root 'steamapps\libraryfolders.vdf'
+    if (Test-Path $lf) { foreach ($m in [regex]::Matches((Get-Content -Raw $lf), '"path"\s*"([^"]+)"')) { $libs += ($m.Groups[1].Value -replace '\\\\', '\') } }
+    $list = New-Object System.Collections.ArrayList
+    foreach ($lib in ($libs | Select-Object -Unique)) {
+        # a library can live on a drive that is not connected right now: skip it quietly
+        $apps = [IO.Path]::Combine($lib, 'steamapps')
+        if (-not [IO.Directory]::Exists($apps)) { continue }
+        foreach ($f in Get-ChildItem $apps -Filter 'appmanifest_*.acf' -ErrorAction SilentlyContinue) {
+            $txt = Get-Content -Raw $f.FullName
+            $id = [regex]::Match($txt, '"appid"\s*"(\d+)"').Groups[1].Value
+            $nm = [regex]::Match($txt, '"name"\s*"([^"]+)"').Groups[1].Value
+            if (-not $id -or -not $nm -or $nm -match 'Redistributable|Steamworks|Proton|Runtime') { continue }
+            $lp = [int64]0; $m = [regex]::Match($txt, '"LastPlayed"\s*"(\d+)"'); if ($m.Success) { $lp = [int64]$m.Groups[1].Value }
+            $sz = [int64]0; $m = [regex]::Match($txt, '"SizeOnDisk"\s*"(\d+)"'); if ($m.Success) { $sz = [int64]$m.Groups[1].Value }
+            $info.Games[$id] = $nm; $info.Bytes += $sz
+            [void]$list.Add([pscustomobject]@{ Name = $nm; LastPlayed = $lp })
+        }
     }
-
-    $r = [Math]::Min(110, $h * 0.40); $cy = $hy - $r * 0.25
-    $circle = [Windows.Media.EllipseGeometry]::new([Windows.Point]::new($cx, $cy), $r, $r)
-    $stripes = New-Object Windows.Media.GeometryGroup
-    for ($k = 0; $k -lt 7; $k++) {
-        $y = $cy - $r * 0.10 + $k * ($r * 0.17); $hh = 1.5 + $k * 1.8
-        [void]$stripes.Children.Add([Windows.Media.RectangleGeometry]::new([Windows.Rect]::new($cx - $r - 2, $y, 2 * $r + 4, $hh)))
-    }
-    $cut = [Windows.Media.CombinedGeometry]::new([Windows.Media.GeometryCombineMode]::Exclude, $circle, $stripes)
-    $above = [Windows.Media.RectangleGeometry]::new([Windows.Rect]::new(0, 0, $w, $hy))
-    $sun = New-Object Windows.Shapes.Path
-    $sun.Data = [Windows.Media.CombinedGeometry]::new([Windows.Media.GeometryCombineMode]::Intersect, $cut, $above)
-    $sb = New-Object Windows.Media.LinearGradientBrush
-    $sb.StartPoint = [Windows.Point]::new(0.5, 0); $sb.EndPoint = [Windows.Point]::new(0.5, 1)
-    $App.SunTop = [Windows.Media.GradientStop]::new((Get-Tint $App.Accent.Color), 0.0)
-    $sb.GradientStops.Add($App.SunTop)
-    $App.SunStop = [Windows.Media.GradientStop]::new($App.Accent.Color, 0.85)
-    $sb.GradientStops.Add($App.SunStop)
-    $sun.Fill = $sb
-    $fx = [Windows.Media.Effects.DropShadowEffect]::new(); $fx.Color = $App.Accent.Color; $fx.BlurRadius = 50; $fx.ShadowDepth = 0; $fx.Opacity = 0.9
-    $sun.Effect = $fx; $App.SunGlow = $fx
-    $cv.Children.Add($sun) | Out-Null
-
-    $floor = New-Object Windows.Shapes.Rectangle
-    $floor.Width = $w; $floor.Height = $h - $hy; $floor.Fill = [Windows.Media.SolidColorBrush]::new((Color '#0A0014'))
-    [Windows.Controls.Canvas]::SetTop($floor, $hy)
-    $cv.Children.Add($floor) | Out-Null
-    $floorGlow = New-Object Windows.Shapes.Rectangle
-    $floorGlow.Width = $w; $floorGlow.Height = $h - $hy; $floorGlow.Fill = $App.Accent
-    $floorGlow.OpacityMask = [Windows.Media.LinearGradientBrush]::new((Color '#40000000'), (Color '#00000000'), 90)
-    [Windows.Controls.Canvas]::SetTop($floorGlow, $hy)
-    $cv.Children.Add($floorGlow) | Out-Null
-
-    for ($k = -16; $k -le 16; $k++) {
-        $ln = New-Object Windows.Shapes.Line
-        $ln.X1 = $cx; $ln.Y1 = $hy; $ln.X2 = $cx + $k * ($w / 9.0); $ln.Y2 = $h
-        $ln.Stroke = $App.Accent; $ln.StrokeThickness = 1; $ln.Opacity = 0.45
-        $cv.Children.Add($ln) | Out-Null
-    }
-    $App.FloorH = New-Object System.Collections.ArrayList
-    for ($k = 0; $k -lt 14; $k++) {
-        $ln = New-Object Windows.Shapes.Line
-        $ln.X1 = 0; $ln.X2 = $w; $ln.Stroke = $App.Accent; $ln.StrokeThickness = 1
-        $cv.Children.Add($ln) | Out-Null; [void]$App.FloorH.Add($ln)
-    }
-    $hl = New-Object Windows.Shapes.Line
-    $hl.X1 = 0; $hl.X2 = $w; $hl.Y1 = $hy; $hl.Y2 = $hy; $hl.Stroke = $App.Accent; $hl.StrokeThickness = 2
-    $fx2 = [Windows.Media.Effects.DropShadowEffect]::new(); $fx2.Color = $App.Accent.Color; $fx2.BlurRadius = 18; $fx2.ShadowDepth = 0; $fx2.Opacity = 1
-    $hl.Effect = $fx2; $App.HzGlow = $fx2
-    $cv.Children.Add($hl) | Out-Null
-    Update-Horizon
+    $info.Installed = $info.Games.Count
+    $info.Recent = @($list | Where-Object LastPlayed -gt 0 | Sort-Object LastPlayed -Descending | Select-Object -First 2)
+    return $info
 }
 
-function Update-Horizon {
-    if (-not $App.FloorH) { return }
-    $App.HzPhase = ($App.HzPhase + 0.010) % 1.0
-    $n = $App.FloorH.Count; $span = $App.HzH - $App.HzY
-    for ($k = 0; $k -lt $n; $k++) {
-        $z = ($k + $App.HzPhase) / $n
-        $y = $App.HzY + $span * [Math]::Pow($z, 2.3)
-        $ln = $App.FloorH[$k]; $ln.Y1 = $y; $ln.Y2 = $y; $ln.Opacity = 0.12 + 0.8 * $z
+function Format-Ago([int64]$Unix) {
+    $d = (Get-Date) - [DateTimeOffset]::FromUnixTimeSeconds($Unix).LocalDateTime
+    if ($d.TotalHours -lt 1) { return 'agora há pouco' }
+    if ($d.TotalHours -lt 24) { return ('há {0}h' -f [int]$d.TotalHours) }
+    if ($d.TotalDays -lt 2) { return 'ontem' }
+    return ('há {0} dias' -f [int]$d.TotalDays)
+}
+
+function Update-SteamInfo {
+    $si = $App.Steam
+    if (-not $si) { return }
+    $Ctl.InfoLibrary.Text = [string]$si.Installed + ' jogos'
+    $Ctl.InfoPersona.Text = ('{0:N0} GB' -f ($si.Bytes / 1GB))
+    if ($si.Recent.Count -gt 0) { $Ctl.InfoLast.Text = $si.Recent[0].Name + '  ·  ' + (Format-Ago $si.Recent[0].LastPlayed) } else { $Ctl.InfoLast.Text = 'nenhum' }
+    $running = 0
+    try { $running = [int](Get-ItemProperty 'HKCU:\Software\Valve\Steam' -ErrorAction Stop).RunningAppID } catch { }
+    if ($running -gt 0) {
+        $nm = 'app ' + $running; if ($si.Games.ContainsKey([string]$running)) { $nm = $si.Games[[string]$running] }
+        $Ctl.InfoRunning.Text = $nm; $Ctl.InfoRunning.Foreground = $Br.Cyan
+    } elseif ($App.SteamRunning) {
+        $Ctl.InfoRunning.Text = 'nada, steam aberta'; $Ctl.InfoRunning.Foreground = $Br.Text
+    } else {
+        $Ctl.InfoRunning.Text = 'steam fechada'; $Ctl.InfoRunning.Foreground = $Br.Dim
+    }
+    if ($App.Pong) {
+        $names = @('PLAYER 1', 'CPU')
+        if ($si.Recent.Count -ge 1) { $names[0] = $si.Recent[0].Name.ToUpper() }
+        if ($si.Recent.Count -ge 2) { $names[1] = $si.Recent[1].Name.ToUpper() }
+        for ($k = 0; $k -lt 2; $k++) { if ($names[$k].Length -gt 22) { $names[$k] = $names[$k].Substring(0, 21) + '~' } }
+        $App.Pong.LName.Text = $names[0]; $App.Pong.RName.Text = $names[1]
+    }
+}
+
+# ---------------------------------------------------------------- neon pong, two bots
+
+function New-Glow([string]$Hex, [double]$Blur) {
+    $fx = [Windows.Media.Effects.DropShadowEffect]::new(); $fx.Color = Color $Hex; $fx.BlurRadius = $Blur; $fx.ShadowDepth = 0; $fx.Opacity = 1
+    return $fx
+}
+function Add-Shape($Shape) { $App.Pong.Canvas.Children.Add($Shape) | Out-Null; return $Shape }
+
+function Build-Game {
+    $cv = $Ctl.Game; $cv.Children.Clear()
+    $w = $cv.ActualWidth; $h = $cv.ActualHeight
+    if ($w -lt 100 -or $h -lt 80) { return }
+    $P = @{ Canvas = $cv; W = $w; H = $h; PW = 8; PH = [Math]::Max(40, $h * 0.22); M = 22; R = 6
+            LY = $h / 2; RY = $h / 2; LS = 0; RS = 0; BX = $w / 2; BY = $h / 2; VX = 0; VY = 0
+            Wait = 25; LErr = 0; RErr = 0; Trail = New-Object System.Collections.ArrayList; Hist = New-Object System.Collections.ArrayList
+            Parts = New-Object System.Collections.ArrayList; Over = 0; Rally = 0 }
+    $App.Pong = $P
+
+    $mid = New-Object Windows.Shapes.Line
+    $mid.X1 = $w / 2; $mid.X2 = $w / 2; $mid.Y1 = 0; $mid.Y2 = $h; $mid.Stroke = $Br.Faint; $mid.StrokeThickness = 2
+    $mid.StrokeDashArray = [Windows.Media.DoubleCollection]::Parse('3 4')
+    [void](Add-Shape $mid)
+
+    foreach ($side in 'L', 'R') {
+        $isL = [int]($side -eq 'L')
+        $sc = New-Object Windows.Controls.TextBlock
+        $sc.FontFamily = 'Cascadia Mono, Consolas'; $sc.FontSize = 46; $sc.FontWeight = 'Bold'; $sc.Opacity = 0.22; $sc.Text = '0'
+        $sc.Width = 120; $sc.TextAlignment = @('Left', 'Right')[$isL]
+        [Windows.Controls.Canvas]::SetLeft($sc, @(($w / 2 + 24), ($w / 2 - 144))[$isL]); [Windows.Controls.Canvas]::SetTop($sc, 4)
+        $P[$side + 'Score'] = (Add-Shape $sc)
+        $nm = New-Object Windows.Controls.TextBlock
+        $nm.FontSize = 10; $nm.FontWeight = 'SemiBold'; $nm.Opacity = 0.7; $nm.Width = 220; $nm.TextAlignment = $sc.TextAlignment
+        [Windows.Controls.Canvas]::SetLeft($nm, @(($w / 2 + 24), ($w / 2 - 244))[$isL]); [Windows.Controls.Canvas]::SetTop($nm, 58)
+        $P[$side + 'Name'] = (Add-Shape $nm)
+    }
+
+    for ($k = 0; $k -lt 9; $k++) {
+        $t = New-Object Windows.Shapes.Ellipse
+        $d = 2 * $P.R * (1 - $k / 11.0); $t.Width = $d; $t.Height = $d; $t.Fill = $App.Accent; $t.Opacity = 0.5 * (1 - $k / 9.0)
+        [void]$P.Trail.Add((Add-Shape $t))
+    }
+    $lp = New-Object Windows.Shapes.Rectangle; $lp.Width = $P.PW; $lp.Height = $P.PH; $lp.Fill = $App.Accent; $lp.RadiusX = 2; $lp.RadiusY = 2
+    $lp.Effect = New-Glow '#FF2BD6' 16; $P.LPad = (Add-Shape $lp)
+    $rp = New-Object Windows.Shapes.Rectangle; $rp.Width = $P.PW; $rp.Height = $P.PH; $rp.Fill = $App.Accent2; $rp.RadiusX = 2; $rp.RadiusY = 2
+    $rp.Effect = New-Glow '#00F0FF' 16; $P.RPad = (Add-Shape $rp)
+    $ball = New-Object Windows.Shapes.Ellipse; $ball.Width = 2 * $P.R; $ball.Height = 2 * $P.R; $ball.Fill = $Br.White
+    $ball.Effect = New-Glow '#FFFFFF' 14; $P.Ball = (Add-Shape $ball)
+
+    for ($k = 0; $k -lt 22; $k++) {
+        $q = New-Object Windows.Shapes.Rectangle; $q.Width = 3; $q.Height = 3; $q.Visibility = 'Collapsed'
+        [void]$P.Parts.Add(@{ Shape = (Add-Shape $q); X = 0; Y = 0; VX = 0; VY = 0; Life = 0 })
+    }
+    $gg = New-Object Windows.Controls.TextBlock
+    $gg.FontSize = 26; $gg.FontWeight = 'Bold'; $gg.Width = $w; $gg.TextAlignment = 'Center'; $gg.Visibility = 'Collapsed'
+    $gg.Effect = New-Glow '#FF2BD6' 20
+    [Windows.Controls.Canvas]::SetTop($gg, $h / 2 - 18); $P.GG = (Add-Shape $gg)
+    Sync-PongColors
+    Update-SteamInfo
+    Update-Game
+}
+
+function Sync-PongColors {
+    $P = $App.Pong; if (-not $P) { return }
+    $P.LPad.Effect.Color = $App.Accent.Color; $P.RPad.Effect.Color = $App.Accent2.Color
+    $P.LScore.Foreground = $App.Accent; $P.RScore.Foreground = $App.Accent2
+    $P.LName.Foreground = $App.Accent; $P.RName.Foreground = $App.Accent2
+}
+
+function Get-PongTarget([double]$PadX) {
+    # where the ball will cross $PadX, folding the bounces off the top and bottom walls
+    $P = $App.Pong
+    $t = ($PadX - $P.BX) / $P.VX
+    $span = $P.H - 2 * $P.R
+    $y = ($P.BY - $P.R) + $P.VY * $t
+    $y = $y % (2 * $span); if ($y -lt 0) { $y += 2 * $span }
+    if ($y -gt $span) { $y = 2 * $span - $y }
+    return $y + $P.R
+}
+
+function Move-Paddle([string]$Side, [double]$Target) {
+    $P = $App.Pong
+    $cur = $P[$Side + 'Y']; $max = 3.2 + [Math]::Min(3.0, $P.Rally * 0.25)
+    $d = $Target - $cur
+    if ([Math]::Abs($d) -gt $max) { $d = [Math]::Sign($d) * $max }
+    $P[$Side + 'Y'] = [Math]::Min($P.H - $P.PH / 2, [Math]::Max($P.PH / 2, $cur + $d))
+}
+
+function Start-Burst([double]$X, [double]$Y, $Fill) {
+    foreach ($q in $App.Pong.Parts) {
+        $a = $App.Rnd.NextDouble() * 2 * [Math]::PI; $sp = 1.5 + $App.Rnd.NextDouble() * 5
+        $q.X = $X; $q.Y = $Y; $q.VX = [Math]::Cos($a) * $sp; $q.VY = [Math]::Sin($a) * $sp; $q.Life = 18 + $App.Rnd.Next(14)
+        $q.Shape.Fill = $Fill; $q.Shape.Visibility = 'Visible'
+    }
+}
+
+function Serve([int]$Dir) {
+    $P = $App.Pong
+    $P.BX = $P.W / 2; $P.BY = $P.H * (0.3 + 0.4 * $App.Rnd.NextDouble())
+    $P.VX = $Dir * 4.2; $P.VY = (($App.Rnd.NextDouble() * 2) - 1) * 2.6
+    $P.Rally = 0; $P.LErr = 0; $P.RErr = 0
+}
+
+function Update-Game {
+    $P = $App.Pong; if (-not $P) { return }
+    $lx = $P.M; $rx = $P.W - $P.M - $P.PW
+
+    if ($P.Over -gt 0) {
+        $P.Over--
+        if ($P.Over -eq 0) { $P.LS = 0; $P.RS = 0; $P.LScore.Text = '0'; $P.RScore.Text = '0'; $P.GG.Visibility = 'Collapsed'; $P.Wait = 20 }
+    } elseif ($P.Wait -gt 0) {
+        $P.Wait--
+        if ($P.Wait -eq 0) { Serve @(-1, 1)[$App.Rnd.Next(2)] }
+    } else {
+        $P.BX += $P.VX; $P.BY += $P.VY
+        if ($P.BY -lt $P.R) { $P.BY = 2 * $P.R - $P.BY; $P.VY = -$P.VY }
+        if ($P.BY -gt $P.H - $P.R) { $P.BY = 2 * ($P.H - $P.R) - $P.BY; $P.VY = -$P.VY }
+
+        # paddle hits: bounce, speed up, angle depends on where it hit; the other bot gets a new aim error
+        if ($P.VX -lt 0 -and $P.BX - $P.R -le $lx + $P.PW -and $P.BX -gt $lx -and [Math]::Abs($P.BY - $P.LY) -le $P.PH / 2 + $P.R) {
+            $P.BX = $lx + $P.PW + $P.R; $P.VX = [Math]::Min(11, -$P.VX * 1.06); $P.VY += ($P.BY - $P.LY) / ($P.PH / 2) * 2.4; $P.Rally++
+            $P.RErr = (($App.Rnd.NextDouble() * 2) - 1) * $P.PH * (0.25 + [Math]::Min(0.6, $P.Rally * 0.05))
+        }
+        if ($P.VX -gt 0 -and $P.BX + $P.R -ge $rx -and $P.BX -lt $rx + $P.PW -and [Math]::Abs($P.BY - $P.RY) -le $P.PH / 2 + $P.R) {
+            $P.BX = $rx - $P.R; $P.VX = [Math]::Max(-11, -$P.VX * 1.06); $P.VY += ($P.BY - $P.RY) / ($P.PH / 2) * 2.4; $P.Rally++
+            $P.LErr = (($App.Rnd.NextDouble() * 2) - 1) * $P.PH * (0.25 + [Math]::Min(0.6, $P.Rally * 0.05))
+        }
+        $P.VY = [Math]::Max(-7, [Math]::Min(7, $P.VY))
+
+        $scored = ''
+        if ($P.BX -lt -12) { $P.RS++; $P.RScore.Text = [string]$P.RS; Start-Burst 4 $P.BY $App.Accent2; $scored = 'R' }
+        elseif ($P.BX -gt $P.W + 12) { $P.LS++; $P.LScore.Text = [string]$P.LS; Start-Burst ($P.W - 4) $P.BY $App.Accent; $scored = 'L' }
+        if ($scored) {
+            $P.BX = $P.W / 2; $P.BY = $P.H / 2; $P.VX = 0; $P.VY = 0; $P.Wait = 28
+            if ($P.LS -ge 7 -or $P.RS -ge 7) {
+                $lw = [int]($P.LS -ge 7)
+                $P.GG.Text = 'GG  //  ' + @($P.RName.Text, $P.LName.Text)[$lw] + ' VENCEU'
+                $P.GG.Foreground = @($App.Accent2, $App.Accent)[$lw]
+                $P.GG.Visibility = 'Visible'; $P.Over = 90; $P.Wait = 0
+            }
+        }
+    }
+
+    # bots: track the predicted crossing point when the ball comes their way, drift to center otherwise
+    if ($P.VX -lt 0) { Move-Paddle 'L' ((Get-PongTarget ($lx + $P.PW)) + $P.LErr); Move-Paddle 'R' ($P.H / 2) }
+    elseif ($P.VX -gt 0) { Move-Paddle 'R' ((Get-PongTarget $rx) + $P.RErr); Move-Paddle 'L' ($P.H / 2) }
+
+    [Windows.Controls.Canvas]::SetLeft($P.LPad, $lx); [Windows.Controls.Canvas]::SetTop($P.LPad, $P.LY - $P.PH / 2)
+    [Windows.Controls.Canvas]::SetLeft($P.RPad, $rx); [Windows.Controls.Canvas]::SetTop($P.RPad, $P.RY - $P.PH / 2)
+    [Windows.Controls.Canvas]::SetLeft($P.Ball, $P.BX - $P.R); [Windows.Controls.Canvas]::SetTop($P.Ball, $P.BY - $P.R)
+    $P.Ball.Visibility = @('Visible', 'Hidden')[[int]($P.Wait -gt 0 -or $P.Over -gt 0)]
+
+    [void]$P.Hist.Insert(0, @($P.BX, $P.BY)); if ($P.Hist.Count -gt 18) { $P.Hist.RemoveAt(18) }
+    for ($k = 0; $k -lt $P.Trail.Count; $k++) {
+        $t = $P.Trail[$k]; $pt = $P.Hist[[Math]::Min($P.Hist.Count - 1, $k * 2 + 1)]
+        [Windows.Controls.Canvas]::SetLeft($t, $pt[0] - $t.Width / 2); [Windows.Controls.Canvas]::SetTop($t, $pt[1] - $t.Height / 2)
+        $t.Visibility = $P.Ball.Visibility
+    }
+
+    foreach ($q in $P.Parts) {
+        if ($q.Life -le 0) { continue }
+        $q.Life--; $q.X += $q.VX; $q.Y += $q.VY; $q.VY += 0.15; $q.VX *= 0.96
+        [Windows.Controls.Canvas]::SetLeft($q.Shape, $q.X); [Windows.Controls.Canvas]::SetTop($q.Shape, $q.Y)
+        $q.Shape.Opacity = [Math]::Min(1, $q.Life / 12.0)
+        if ($q.Life -le 0) { $q.Shape.Visibility = 'Collapsed' }
     }
 }
 
@@ -896,11 +1069,10 @@ function Get-Tint($Col) {
 function Set-Accent([string]$Hex) {
     $col = Color $Hex
     $App.Accent.Color = $col
-    if ($App.SunTop) { $App.SunTop.Color = Get-Tint $col }
-    if ($App.SunStop) { $App.SunStop.Color = $col }
-    if ($App.SunGlow) { $App.SunGlow.Color = $col }
-    if ($App.HzGlow) { $App.HzGlow.Color = $col }
+    $other = '#00F0FF'; if ($Hex -eq '#00F0FF') { $other = '#FF2BD6' }
+    $App.Accent2.Color = Color $other
     $Ctl.ModeGlow.Color = $col
+    Sync-PongColors
 }
 
 # ---------------------------------------------------------------- readout
@@ -1153,10 +1325,7 @@ $FxTimer.Add_Tick({
         if ($target -ne $App.BootPos) { $App.BootPos = $target; $Ctl.BootText.Text = $App.BootText.Substring(0, $App.BootPos) }
         if ($App.BootPos -ge $App.BootText.Length -and $elapsed -gt ($App.BootText.Length * $msPerChar + 500)) { Finish-Boot }
     }
-    Update-Horizon
-    if ($App.Stars -and $App.Tick % 3 -eq 0) {
-        $s = $App.Stars[$App.Rnd.Next($App.Stars.Count)]; $s.Opacity = 0.15 + $App.Rnd.NextDouble() * 0.85
-    }
+    Update-Game
     # chromatic aberration on the big status word: calm drift + a glitch burst every few seconds
     $pk = $Ctl.StatusPink.RenderTransform; $cy = $Ctl.StatusCyan.RenderTransform
     if ($App.Glitch -gt 0) {
@@ -1185,7 +1354,7 @@ $ClockTimer.Interval = [TimeSpan]::FromMilliseconds(1000)
 $ClockTimer.Add_Tick({
     $Ctl.Clock.Text = (Get-Date).ToString('ddd dd/MM  HH:mm:ss').ToUpper()
     $App.ClockTick++
-    if ($App.ClockTick % 3 -eq 0) { $App.SteamRunning = Test-SteamRunning }
+    if ($App.ClockTick % 3 -eq 0) { $App.SteamRunning = Test-SteamRunning; Update-SteamInfo }
     Update-Readout
     Update-NowLine
     if ($App.Testing) {
@@ -1216,7 +1385,10 @@ Update-NowLine
 Start-Boot
 $Ctl.Clock.Text = (Get-Date).ToString('ddd dd/MM  HH:mm:ss').ToUpper()
 
-$Window.Add_ContentRendered({ Build-Horizon; $FxTimer.Start(); $ClockTimer.Start() })
+$Window.Add_ContentRendered({
+    try { $App.Steam = Read-SteamInfo } catch { }
+    Build-Game; $FxTimer.Start(); $ClockTimer.Start()
+})
 
 if ($Screenshot) {
     $shot = New-Object Windows.Threading.DispatcherTimer

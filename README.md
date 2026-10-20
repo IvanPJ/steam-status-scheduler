@@ -26,7 +26,9 @@ Tecla Windows, digite **Steam Status Scheduler**, Enter. Abre uma janela nativa 
 - **Janelas de horário**: `+ NOVA`, `DUPLICAR`, `REMOVER`.
 - **Editar janela**: nome, dias (com atalhos seg a sex, fim de semana, todos), início e fim em `HH:mm` e o status durante a janela.
 - **Fora das janelas**: pra onde voltar quando a janela termina, normalmente `ONLINE`.
-- O painel grande mostra o status que a programação manda agora, a próxima janela e a contagem regressiva. A cena toda muda de cor conforme o status.
+- O painel grande mostra o status que a programação manda agora, a próxima janela e a contagem regressiva.
+- Embaixo, dois bots jogam Pong neon sozinhos, batizados com os dois jogos que você jogou por último. As cores seguem o seu status.
+- A faixa de baixo mostra o jogo rodando agora, o último jogo, quantos jogos tem na biblioteca e quanto espaço eles ocupam. Tudo vem só dos manifestos da biblioteca de jogos; nenhum dado de conta ou login da Steam é lido.
 - **SALVAR** grava o config e recria as tarefas do Windows na hora.
 - **TESTAR 45s** deixa você invisível por 45 segundos e volta pra online.
 - **AGENDA** mostra as tarefas criadas, com a próxima e a última execução.
