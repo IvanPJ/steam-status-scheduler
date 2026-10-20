@@ -10,7 +10,8 @@
 [CmdletBinding()]
 param(
     [string]$Screenshot,           # debug: render the window to this PNG after a delay and exit
-    [int]$ScreenshotDelayMs = 4000
+    [int]$ScreenshotDelayMs = 4000,
+    [switch]$Demo                  # docs: sample schedule and sample library instead of the real ones
 )
 
 $ErrorActionPreference = 'Stop'
@@ -1386,6 +1387,11 @@ if (-not (Test-Path $ConfigPath)) {
     exit 1
 }
 $App.Cfg = Load-Config
+if ($Demo) {
+    $App.Cfg = @{ defaultStatus = 'online'; windows = New-Object System.Collections.ArrayList }
+    [void]$App.Cfg.windows.Add(@{ name = 'jogar sozinho'; days = @('Saturday', 'Sunday'); start = '06:00'; end = '12:00'; status = 'invisible' })
+    [void]$App.Cfg.windows.Add(@{ name = 'noite de foco'; days = @('Monday', 'Tuesday', 'Wednesday', 'Thursday'); start = '20:00'; end = '23:30'; status = 'busy' })
+}
 $App.SteamRunning = Test-SteamRunning
 if ($App.Cfg.windows.Count -gt 0) { $App.Selected = 0 }
 
@@ -1397,6 +1403,11 @@ $Ctl.Clock.Text = (Get-Date).ToString('ddd dd/MM  HH:mm:ss').ToUpper()
 
 $Window.Add_ContentRendered({
     try { $App.Steam = Read-SteamInfo } catch { }
+    if ($Demo) {
+        $App.Steam = @{ Games = @{}; Installed = 48; Bytes = [int64]1.2TB
+            Recent = @([pscustomobject]@{ Name = 'Hollow Knight'; LastPlayed = [DateTimeOffset]::Now.AddHours(-3).ToUnixTimeSeconds() },
+                       [pscustomobject]@{ Name = 'Hades'; LastPlayed = [DateTimeOffset]::Now.AddDays(-2).ToUnixTimeSeconds() }) }
+    }
     Build-Game; $FxTimer.Start(); $ClockTimer.Start()
 })
 
